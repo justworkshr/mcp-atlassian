@@ -2,6 +2,7 @@
 
 import json
 import logging
+from pathlib import Path
 from typing import Annotated
 
 from fastmcp import Context, FastMCP
@@ -441,11 +442,19 @@ async def create_page(
     ],
     title: Annotated[str, Field(description="The title of the page")],
     content: Annotated[
-        str,
+        str | None,
         Field(
-            description="The content of the page. Format depends on content_format parameter. Can be Markdown (default), wiki markup, or storage format"
+            description="The content of the page. Format depends on content_format parameter. Can be Markdown (default), wiki markup, or storage format. Either content or file_path is required.",
+            default=None,
         ),
-    ],
+    ] = None,
+    file_path: Annotated[
+        str | None,
+        Field(
+            description="(Optional) Absolute path to a markdown file on disk. When provided, content is read from the file instead of the content parameter. This avoids passing large content through the LLM context window.",
+            default=None,
+        ),
+    ] = None,
     parent_id: Annotated[
         str | None,
         Field(
@@ -496,6 +505,18 @@ async def create_page(
     """
     confluence_fetcher = await get_confluence_fetcher(ctx)
 
+    # Resolve content from file_path or inline content
+    if file_path and content:
+        raise ValueError("Provide either 'content' or 'file_path', not both.")
+    if file_path:
+        path = Path(file_path)
+        if not path.is_file():
+            raise ValueError(f"File not found: {file_path}")
+        content = path.read_text(encoding="utf-8")
+        content_format = "markdown"  # Files are always markdown
+    if not content:
+        raise ValueError("Either 'content' or 'file_path' must be provided.")
+
     # Validate content_format
     if content_format not in ["markdown", "wiki", "storage"]:
         raise ValueError(
@@ -540,11 +561,19 @@ async def update_page(
     page_id: Annotated[str, Field(description="The ID of the page to update")],
     title: Annotated[str, Field(description="The new title of the page")],
     content: Annotated[
-        str,
+        str | None,
         Field(
-            description="The new content of the page. Format depends on content_format parameter"
+            description="The new content of the page. Format depends on content_format parameter. Either content or file_path is required.",
+            default=None,
         ),
-    ],
+    ] = None,
+    file_path: Annotated[
+        str | None,
+        Field(
+            description="(Optional) Absolute path to a markdown file on disk. When provided, content is read from the file instead of the content parameter. This avoids passing large content through the LLM context window.",
+            default=None,
+        ),
+    ] = None,
     is_minor_edit: Annotated[
         bool, Field(description="Whether this is a minor edit", default=False)
     ] = False,
@@ -599,6 +628,18 @@ async def update_page(
         ValueError: If Confluence client is not configured, available, or invalid content_format.
     """
     confluence_fetcher = await get_confluence_fetcher(ctx)
+
+    # Resolve content from file_path or inline content
+    if file_path and content:
+        raise ValueError("Provide either 'content' or 'file_path', not both.")
+    if file_path:
+        path = Path(file_path)
+        if not path.is_file():
+            raise ValueError(f"File not found: {file_path}")
+        content = path.read_text(encoding="utf-8")
+        content_format = "markdown"  # Files are always markdown
+    if not content:
+        raise ValueError("Either 'content' or 'file_path' must be provided.")
 
     # Validate content_format
     if content_format not in ["markdown", "wiki", "storage"]:

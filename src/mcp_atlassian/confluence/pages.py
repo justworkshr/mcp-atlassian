@@ -502,6 +502,13 @@ class PagesMixin(ConfluenceClient):
             if emoji:
                 self._set_page_emoji(page_id, emoji)
 
+            # Fix page width: API-created pages default to "fixed-width" which
+            # renders content narrower than the title. Override to "default".
+            v2 = self._v2_adapter
+            if v2:
+                v2._set_page_property(page_id, "content-appearance-published", "default")
+                v2._set_page_property(page_id, "content-appearance-draft", "default")
+
             return self.get_page_content(page_id)
         except Exception as e:
             logger.error(
