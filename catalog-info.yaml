@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mcp-atlassian
+  description: "Model Context Protocol (MCP) server for Atlassian products (Confluence and Jira). Supports both Cloud and Server/Data Center deployments."
+  annotations:
+    github.com/project-slug: justworkshr/mcp-atlassian
+  tags:
+    - python
+spec:
+  lifecycle: production
+  type: service
+  owner: unassigned
