@@ -10,4 +10,4 @@ metadata:
 spec:
   lifecycle: production
   type: service
-  owner: unassigned
+  owner: dev-ex
