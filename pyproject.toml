@@ -5,7 +5,7 @@ description = "The Model Context Protocol (MCP) Atlassian integration is an open
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "atlassian-python-api>=4.0.0",
+    "atlassian-python-api>=4.0.0,<5.0.0",
     "requests[socks]>=2.31.0",
     "beautifulsoup4>=4.12.3",
     "httpx>=0.28.0",
